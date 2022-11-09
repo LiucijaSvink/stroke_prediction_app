@@ -1,0 +1,107 @@
+# -*- coding: utf-8 -*-
+"""
+@author: Liucija Svinkunaite
+"""
+import xgboost as xgb
+import streamlit as st
+import pandas as pd
+from typing import Integer
+import numpy as np
+import joblib
+
+#Loading up the Regression model we created
+loaded_model = joblib.load('final_stroke_model.pkl')
+threshold = 0.30395493
+
+#Caching the model for faster loading
+@st.cache
+
+# Define the prediction function
+def prepare_data(gender, age, heart_disease, ever_married, work_type, avg_glucose_level, bmi):
+    
+    if gender == 'other':
+        gender = np.nan
+    
+    if work_type == 'government job':
+        work_type = 'govt_job'
+    elif work_type == 'job in private sector':
+        work_type = 'private'
+    elif work_type == 'self-employed':
+        work_type = 'private'
+    elif work_type == 'taking care of children':
+        work_type = 'children'
+    elif work_type == 'never worked':
+        work_type = 'never_worked'
+    elif work_type == 'never worked':
+        work_type = 'never_worked'
+    elif work_type == 'self_employed':
+        work_type = work_type
+    
+    # Derive stroke probability
+    if age < 45: 
+        stroke_prob = 0.6
+    else:
+        stroke_prob =  0.6 * 2 ** ((age-45)/10)
+    
+    # Assign bmi category
+    if bmi <= 18:
+        bmi_category = '1'
+    elif bmi > 18 and bmi <= 25:
+        bmi_category = '2'
+    elif bmi > 25 and bmi <= 30:
+        bmi_category = '3'
+    elif bmi > 30 and bmi <= 35:
+        bmi_category = '4'
+    elif bmi > 35 and bmi <= 120:
+        bmi_category = '5'
+    
+    if avg_glucose_level >= 126:
+        diabetes = 1
+    else:
+        diabetes = 0
+    
+    column_names = ['gender', 'age', 'heart_disease', 'ever_married', 
+                    'work_type', 'avg_glucose_level', 'bmi', 'stroke_prob', 
+                    'bmi_category', 'diabetes']
+    
+    data = pd.DataFrame([[gender, age, heart_disease, ever_married, work_type,
+                          avg_glucose_level, bmi, stroke_prob, bmi_category, 
+                          diabetes]], columns=column_names)
+    
+    # Assign respective data types 
+    categorical_cols = ['gender', 'heart_disease', 'ever_married', 
+                    'work_type', 'bmi_category', 'diabetes']
+
+    data[categorical_cols] = data[categorical_cols].astype('category')
+    
+    return data
+        
+
+def make_prediction(model, data, threshold):
+    predicted_prob = model.predict_proba(data)[:, 1]
+    prediction = (predicted_prob >= threshold).astype(int)
+    if prediction == 1:
+        prediction = 'Patient is liekely to experience stroke. Probability equals {predicted_prob}.'
+    elif prediction == 0:
+        prediction = 'Patient is not likely to experience stroke'
+            
+    return prediction
+
+
+st.title('Stroke prediction')
+st.image("""https://www.thestreet.com/.image/ar_4:3%2Cc_fill%2Ccs_srgb%2Cq_auto:good%2Cw_1200/MTY4NjUwNDYyNTYzNDExNTkx/why-dominion-diamonds-second-trip-to-the-block-may-be-different.png""")
+st.header('Please enter the data of the patient:')
+gender = st.selectbox('Gender:', ['female', 'male', 'other'])
+age = st.number_input('Age:', min_value=0.1, max_value=110, value=1.0)
+heart_disease = st.selectbox('Does the patient have heart disease?', ['yes', 'no'])
+ever_married = st.selectbox('Was the patient ever married?', ['yes', 'no'])
+work_type = st.selectbox('What type of job does the patient have?', ['government job', 'job in private sector', 'self-employed', 'taking care of children', 'never worked'])
+avg_glucose_level = st.number_input('Enter the average glucose level of the patient:', min_value=40.0, max_value=300.0, value=100.0)
+bmi = st.number_input('Enter BMI of the patient:', min_value=40.0, max_value=300.0, value=100.0)
+
+if st.button('Predict stroke'):
+    stroke_data = prepare_data(gender, age, heart_disease, ever_married, 
+                               work_type, avg_glucose_level, bmi)
+    
+    stroke_prediction = make_prediction(model, stroke_data, threshold)
+    st.success(f'{stroke_prediction}')
