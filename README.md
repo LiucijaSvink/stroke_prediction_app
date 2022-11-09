@@ -1,2 +1,2 @@
-# stroke_prediction_app
+# Stroke prediction app
 Repository for stroke prediction model deployment
