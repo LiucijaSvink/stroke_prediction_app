@@ -88,7 +88,7 @@ def make_prediction(model, data, threshold):
 st.title('Stroke prediction')
 st.header('Please enter the data of the patient:')
 gender = st.selectbox('Gender:', ['female', 'male', 'other'])
-age = st.number_input('Age:', min_value=0.1, max_value=110, value=30.0)
+age = st.number_input('Age:', min_value=0.1, max_value=110.0, value=30)
 heart_disease = st.selectbox('Does the patient have heart disease?', ['yes', 'no'])
 ever_married = st.selectbox('Was the patient ever married?', ['yes', 'no'])
 work_type = st.selectbox('What type of job does the patient have?', ['government job', 'job in private sector', 'self-employed', 'taking care of children', 'never worked'])
