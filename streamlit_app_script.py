@@ -7,14 +7,14 @@ import pandas as pd
 import numpy as np
 import joblib
 
-#Loading up the Regression model we created
+# Loading up the classification pipeline created
 stroke_model = joblib.load('stroke_model.pkl')
 threshold = 0.30395493
 
-#Caching the model for faster loading
-# @st.cache
+# Caching the model for faster loading
+@st.cache
 
-# Define the prediction function
+# Define prediction function
 def prepare_data(gender, age, heart_disease, ever_married, work_type, avg_glucose_level, bmi):
     
     if gender == 'other':
@@ -78,7 +78,7 @@ def make_prediction(model, data, threshold):
     predicted_prob = model.predict_proba(data)[:, 1]
     prediction = (predicted_prob >= threshold).astype(int)
     if prediction == 1:
-        prediction = 'Patient is liekely to experience stroke. Probability equals {predicted_prob}.'
+        prediction = 'Patient is likely to experience stroke.'
     elif prediction == 0:
         prediction = 'Patient is not likely to experience stroke'
             
@@ -88,7 +88,7 @@ def make_prediction(model, data, threshold):
 st.title('Stroke prediction')
 st.header('Please enter the data of the patient:')
 gender = st.selectbox('Gender:', ['female', 'male', 'other'])
-age = st.number_input('Age:', min_value=0.1, max_value=110.0, value=30.0)
+age = st.number_input('Age:', min_value=0.1, max_value=110, value=30.0)
 heart_disease = st.selectbox('Does the patient have heart disease?', ['yes', 'no'])
 ever_married = st.selectbox('Was the patient ever married?', ['yes', 'no'])
 work_type = st.selectbox('What type of job does the patient have?', ['government job', 'job in private sector', 'self-employed', 'taking care of children', 'never worked'])
