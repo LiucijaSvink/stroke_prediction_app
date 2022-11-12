@@ -9,7 +9,7 @@ import joblib
 
 # Loading up the classification pipeline created
 stroke_model = joblib.load('stroke_model.pkl')
-threshold = 0.30395493
+threshold = 0.23766574
 
 # Caching the model for faster loading
 @st.cache
@@ -74,8 +74,8 @@ def prepare_data(gender, age, heart_disease, ever_married, work_type, avg_glucos
     
     return data
         
-def make_prediction(model, data, threshold):
-    predicted_prob = model.predict_proba(data)[:, 1]
+def make_prediction(pipeline, data, threshold):
+    predicted_prob = pipeline.predict_proba(data)[:, 1]
     prediction = (predicted_prob >= threshold).astype(int)
     if prediction == 1:
         prediction = 'Patient is likely to experience stroke.'
