@@ -10,7 +10,7 @@ from sklearn.pipeline import Pipeline
 
 # Loading up the classification pipeline created
 stroke_model = joblib.load('stroke_model.pkl')
-threshold = 0.2967177
+threshold = 0.40376893
 
 # Caching the model for faster loading
 @st.cache
